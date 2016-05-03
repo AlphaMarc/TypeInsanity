@@ -182,13 +182,6 @@ instance NE W W False where ne = u
 class All l b | l -> b where
   all :: l -> b
 
-instance All Nil True where
-  all = u
-instance All (False:::xs) False where
-  all = u
-instance (All xs b) => All (True:::xs) b where
-  all = u
-
 -- define class compatible to check if all faces of two cubes are of different colors
 class Compatible c1 c2 b | c1 c2 -> b where
   compatible :: c1 -> c2 -> b
