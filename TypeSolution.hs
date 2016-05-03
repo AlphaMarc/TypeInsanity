@@ -193,26 +193,10 @@ instance (All xs b) => All (True:::xs) b where
 class Compatible c1 c2 b | c1 c2 -> b where
   compatible :: c1 -> c2 -> b
 
-instance (
-  NE f1 f2 bF,
-  NE r1 r2 bR,
-  NE b1 b2 bB,
-  NE l1 l2 bL,
-  All (bF ::: bR ::: bB ::: bL :::Nil) b)
-  => Compatible (Cube u1 f1 r1 b1 l1 d1) (Cube u2 f2 r2 b2 l2 d2) b where
-    compatible = u
-
 
 -- Allowed class generalizes Compatible over lists
 class Allowed c cs b | c cs -> b where
   allowed :: c -> cs -> b
-
-instance Allowed c Nil True where
-  allowed = u
-instance (Compatible c y b1,
-          Allowed c ys b2,
-          And b1 b2 b) =>
-          Allowed c (y:::ys) b where allowed = u
 
 
 -- And last but not least we can create the Solutions class that will
@@ -220,14 +204,6 @@ instance (Compatible c y b1,
 class Solutions cs ss | cs -> ss where
   solutions :: cs -> ss
 
-instance Solutions Nil (Nil:::Nil) where
-  solutions = u
-
-instance (Solutions cs sols,
-          Apply Orientations c os,
-          AllowedCombinations os sols zs) =>
-          Solutions (c:::cs) zs where
-  solutions = u
 
 
 -- this class recurses over the orientations generated and current solutions to
@@ -235,24 +211,7 @@ instance (Solutions cs sols,
 class AllowedCombinations os sols zs | os sols -> zs where
     allowedCombinations :: os -> sols -> zs
 
-instance AllowedCombinations os Nil Nil where
-    allowedCombinations = u
-
-instance (AllowedCombinations os sols as,
-          MatchingOrientations os s bs,
-          ListConcat as bs zs) =>
-          AllowedCombinations os (s:::sols) zs where
-      allowedCombinations = u
 
 -- Recurses over the orientations of the new cube checking against existing solutions
 class MatchingOrientations os sol zs | os sol -> zs where
   matchingOrientations :: os -> sol -> zs
-
-instance MatchingOrientations Nil sol Nil where
-  matchingOrientations = u
-
-instance (MatchingOrientations os sol as,
-          Allowed o sol b,
-          AppendIf b (o:::sol) as zs) =>
-          MatchingOrientations (o:::os) sol zs where
-  matchingOrientations = u
