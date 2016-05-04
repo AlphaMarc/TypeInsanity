@@ -13,6 +13,14 @@ data W -- White
 
 data Cube u f r b l d
 
+type Cube Int Int Int Int Int String
+
+type Cubes = (Cube1 ::: Cube2 ::: Cube3 ::: Cube4 ::: Nil)
+type ColorCubes = (CubeRed ::: CubeBlue ::: Nil)
+type Solution1Begin = (SCube1:::SCube2:::SCube3:::Nil)
+type Solution2Begin = (SCube2:::SCube3:::Nil)
+type SolutionsBegin = Solution1Begin ::: Solution2Begin ::: Nil
+
 type SCube1 = Cube G B B R W G
 type SCube2 = Cube R G R W B W
 type SCube3 = Cube R W G B R R
@@ -55,17 +63,9 @@ instance And False False False where
 
 -- define lists in type system
 data Nil
---data Cons x xs (is cumbersome to see)
-data x ::: xs
-infixr 5 :::
-
-
-type Cubes = (Cube1 ::: Cube2 ::: Cube3 ::: Cube4 ::: Nil)
-type ColorCubes = (CubeRed ::: CubeBlue ::: Nil)
-type Solution1Begin = (SCube1:::SCube2:::SCube3:::Nil)
-type Solution2Begin = (SCube2:::SCube3:::Nil)
-type SolutionsBegin = Solution1Begin ::: Solution2Begin ::: Nil
-
+data Cons x xs -- (is cumbersome to see)
+--data x ::: xs
+--infixr 5 :::
 
 class ListConcat l1 l2 l | l1 l2 -> l where
   listConcat :: l1 -> l2 -> l
@@ -98,10 +98,7 @@ class Map f xs zs | f xs -> zs where
 
 instance Map f Nil Nil where
   map = u
-
--- we need two types constraints
--- one to call apply on the head
--- the other to call map on the tail (recursive call)
+-- we need two types constraints : 1) to call apply on the head 2) to call map on the tail (recursive call)
 instance (Apply f x y, Map f xs ys) => Map f (x:::xs) (y:::ys) where
   map = u
 
