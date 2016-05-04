@@ -106,14 +106,6 @@ instance (Apply f x y, Map f xs ys) => Map f (x:::xs) (y:::ys) where
   map = u
 
 
--- we can create a filter using the same methods
-class Filter f xs zs | f xs -> zs where
-  filter :: f -> xs -> zs
-
-instance Filter f Nil Nil where
-  filter = u
-instance (Apply f x b , Filter f xs ys, AppendIf b x ys zs) => Filter f (x ::: xs) zs where
-  filter = u
 
 -- we append the element of type x to the list only if b is True
 -- otherwise we return the list of type ys
@@ -131,20 +123,10 @@ instance AppendIf False x ys ys where
 class MapAppend f xs zs | f xs -> zs where
   mapAppend :: f -> xs -> zs
 
-instance MapAppend f Nil Nil where
-  mapAppend = u
-instance (Map f xs ys, ListConcat xs ys zs) => MapAppend f xs zs where
-  mapAppend = u
-
 
 -- two times reduction (for all twists)
 class MapAppend2 f xs zs | f xs -> zs where
   mapAppend2 :: f -> xs -> zs
-
-instance MapAppend2 f Nil Nil where
-  mapAppend2 = u
-instance (Map f xs ys, MapAppend f ys ys2, ListConcat xs ys2 zs) => MapAppend2 f xs zs where
-  mapAppend2 = u
 
 
   -- three times reduction (for all rotations)
@@ -187,37 +169,15 @@ instance NE W W False where ne = u
 class All l b | l -> b where
   all :: l -> b
 
-instance All Nil True where
-  all = u
-instance All (False:::xs) False where
-  all = u
-instance (All xs b) => All (True:::xs) b where
-  all = u
-
 -- define class compatible to check if all faces of two cubes are of different colors
 class Compatible c1 c2 b | c1 c2 -> b where
   compatible :: c1 -> c2 -> b
 
-instance (
-  NE f1 f2 bF,
-  NE r1 r2 bR,
-  NE b1 b2 bB,
-  NE l1 l2 bL,
-  All (bF ::: bR ::: bB ::: bL :::Nil) b)
-  => Compatible (Cube u1 f1 r1 b1 l1 d1) (Cube u2 f2 r2 b2 l2 d2) b where
-    compatible = u
 
 
 -- Allowed class generalizes Compatible over lists
 class Allowed c cs b | c cs -> b where
   allowed :: c -> cs -> b
-
-instance Allowed c Nil True where
-  allowed = u
-instance (Compatible c y b1,
-          Allowed c ys b2,
-          And b1 b2 b) =>
-          Allowed c (y:::ys) b where allowed = u
 
 
 -- And last but not least we can create the Solutions class that will
@@ -225,39 +185,11 @@ instance (Compatible c y b1,
 class Solutions cs ss | cs -> ss where
   solutions :: cs -> ss
 
-instance Solutions Nil (Nil:::Nil) where
-  solutions = u
-
-instance (Solutions cs sols,
-          Apply Orientations c os,
-          AllowedCombinations os sols zs) =>
-          Solutions (c:::cs) zs where
-  solutions = u
-
-
 -- this class recurses over the orientations generated and current solutions to
 -- remove the ones that do not fit
 class AllowedCombinations os sols zs | os sols -> zs where
     allowedCombinations :: os -> sols -> zs
 
-instance AllowedCombinations os Nil Nil where
-    allowedCombinations = u
-
-instance (AllowedCombinations os sols as,
-          MatchingOrientations os s bs,
-          ListConcat as bs zs) =>
-          AllowedCombinations os (s:::sols) zs where
-      allowedCombinations = u
-
 -- Recurses over the orientations of the new cube checking against existing solutions
 class MatchingOrientations os sol zs | os sol -> zs where
   matchingOrientations :: os -> sol -> zs
-
-instance MatchingOrientations Nil sol Nil where
-  matchingOrientations = u
-
-instance (MatchingOrientations os sol as,
-          Allowed o sol b,
-          AppendIf b (o:::sol) as zs) =>
-          MatchingOrientations (o:::os) sol zs where
-  matchingOrientations = u
